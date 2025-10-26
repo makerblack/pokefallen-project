@@ -1,0 +1,8 @@
+{
+    "vsync": true,
+    "smoothScaling": false,
+    "windowSize": "512x384",
+    "disableautotiles": false, 
+    "fontScale": "0.9",
+    "speedUp": "1"
+}
