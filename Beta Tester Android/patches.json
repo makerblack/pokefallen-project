@@ -1,0 +1,34 @@
+{
+    "rpgm": [
+        {
+            "author": "[ g f y ]",
+            "comment": "Patch PokeFallen RPG script loader",
+            "key": "eval(code)",
+            "value": "eval(MKXP.apply_overrides(code))"
+        },
+        {
+            "author": "[ g f y ]",
+            "comment": "Patch PokeFallen RPG script loader",
+            "key": "eval(code, nil, script)",
+            "value": "eval(MKXP.apply_overrides(code), nil, script)"
+        },
+        {
+            "author": "[ Maker Black ]",
+            "comment": "Patch PokeFallen",
+            "key": "Encoding::UTF_8",
+            "value": "'UTF-8'"
+        },
+        {
+            "author": "[ Maker Black ]",
+            "comment": "Patch PokeFallen",
+            "key": "Dir.pwd",
+            "value": "''"
+        },
+        {
+            "author": "[ Maker Black ]",
+            "comment": "Patch PokeFallen",
+            "key": "self.delta.to_f / 1_000_000",
+            "value": "self.delta"
+        }
+    ]
+}

@@ -1,0 +1,739 @@
+
+# Launcher Beta Test
+$beta_tester_community = true 
+$beta_tester           = true
+$new_online_methods    = false 
+INICIO_TEMPORADA = 3032025
+CURRENT_GAME_VERSION = 50.3
+PASS_RESET           = 25.5
+SHOP_RESET           = 25.5
+JOHTO_VERSION = true
+
+def pbSetTrainerScripts
+  # BETA CONFIG
+  beta = false 
+  if $player.name == "Vinícius" && $player.public_ID == 20589
+    p "Entrada Vinícius Permitida! Não utilize este Save na Versão Oficial." 
+    beta = true 
+    $online_battles        = true
+    $beta_tester           = true
+    $permissão_entrada     = true 
+    $youtuber_mode         = true 
+    $game_variables[526]   = true
+    $player.name = "Ritchie (BETA TESTER)"
+  elsif $player.name == "Gamer" && $player.public_ID == 596
+    p "Entrada Gamer Permitida! Não utilize este Save na Versão Oficial." 
+    beta = true
+    $online_battles        = true
+    $beta_tester           = true
+    $permissão_entrada     = true 
+    $youtuber_mode         = true 
+    $game_variables[526]   = true
+    $player.name = "Ritchie (BETA TESTER)"
+  elsif $player.name == "Augusto" && $player.public_ID == 7660
+    p "Entrada Augusto Permitida! Não utilize este Save na Versão Oficial." 
+    beta = true
+    $online_battles        = true
+    $beta_tester           = true
+    $permissão_entrada     = true 
+    $youtuber_mode         = true 
+    $game_variables[526]   = true
+    $player.name = "Ritchie (BETA TESTER)"
+  elsif $player.name == "Ritchie (BETA TESTER)" || $player.name == "Leaf (BETA TESTER)"
+    beta = true
+    $online_battles        = true
+    $beta_tester_community = true 
+    $beta_tester  = true
+  end
+  for i in 1481...1491
+    $game_switches[i] = true 
+  end 
+  !exit if !beta 
+  p "Leitura - Scripts ID 0" if $adm_mode 
+  # Batalhas Onlines suspensas
+  p "Leitura - Scripts ID 1" if $adm_mode 
+  pbUpdateLauncher_and_archives
+  p "Leitura - Scripts ID 2" if $adm_mode 
+  $desafio.gain_rounds 
+  p "Leitura - Scripts ID 3" if $adm_mode 
+  insert_events("Intro")
+  p "Leitura - Scripts ID 4" if $adm_mode 
+  pbSetResizeFactor([$PokemonSystem.screensize ? $PokemonSystem.screensize : 1, 4].min)
+  p "Leitura - Scripts ID 5" if $adm_mode 
+  Settings.send(:remove_const, :JOHTO_VERSION)   
+  Settings.const_set(:JOHTO_VERSION, true)
+  Settings.send(:remove_const, :JOHTO)   
+  Settings.const_set(:JOHTO, 1.0)
+  p "Leitura - Scripts ID 6" if $adm_mode 
+  for x in 376...386
+     $game_switches[x] = true
+  end 
+  for x in 1491..1500
+    $game_switches[x] = true 
+  end 
+  SaveUpdater.pbResetHalloween if $beta_tester && $game_variables[90] < 50.3
+end
+
+def pbSetResizeFactor(factor)
+  if !$ResizeInitialized
+    Graphics.resize_screen(Settings::SCREEN_WIDTH, Settings::SCREEN_HEIGHT)
+    $ResizeInitialized = true
+  end
+  if factor < 0 || factor == 4
+    Graphics.fullscreen = true if !Graphics.fullscreen
+  else
+    Graphics.fullscreen = false if Graphics.fullscreen
+    Graphics.scale = (factor + 1) * 0.5
+    Graphics.center
+  end
+end
+
+    
+def pbUpdateLauncher_and_archives
+  #-----------------------------------
+  # Update Launcher PC VERSION
+  #-----------------------------------
+  if !$joiplay
+    if ARGV.length > 0 && ARGV[0] == "launch_from_launcher"
+      # Inicialização natural
+    else
+      pbIntroMessage("Execute o Launcher para iniciar o projeto corretamente!")
+      !exit
+    end
+    $safety_fallen  = LAUNCHER_DATA["safety_fallen"]      if LAUNCHER_DATA.key?("safety_fallen")
+    $version_fallen = LAUNCHER_DATA["version_fallen"]     if LAUNCHER_DATA.key?("version_fallen")
+    p "Tentando fazer a leitura de Launcher Data" if $adm_mode
+    p LAUNCHER_DATA if $adm_mode
+    fallen_define_constants!(LAUNCHER_DATA)
+    current_directory    = File.dirname(__FILE__)
+    parent_directory     = File.expand_path('..', current_directory)
+    launcher_directory   = File.join(parent_directory, 'Launcher')
+    launcher_rxdata_path = File.join(parent_directory, 'Launcher', 'Launcher.rxdata')
+    directory            = launcher_directory
+    file_path            = File.join(directory, "")
+    url = "https://raw.githubusercontent.com/messi3d/PokeFallen-UPDATES/main/Beta Tester/Scripts/Launcher.rxdata"
+    if File.size(launcher_rxdata_path) != 65626
+      Launcher.pbDownloadToFile_Launcher(url, "Launcher.rxdata", file_path)
+      pbIntroMessage("Dados do Launcher foram atualizados, reiniciando...")
+      !exit
+    end
+    
+    begin
+      assets_directory = File.join(parent_directory, 'Assets/')
+      bubble_path      = File.join(assets_directory, 'Bubble.png')
+      url_bubble       = "https://raw.githubusercontent.com/messi3d/PokeFallen-UPDATES/main/Launcher PokeFallen/Assets/Bubble.png"
+      Dir.mkdir(assets_directory) unless Dir.exist?(assets_directory)
+      if !File.exist?(bubble_path) || File.size(bubble_path) != 4923
+        Launcher.pbDownloadToFile_Launcher(url_bubble, "Bubble.png", assets_directory)
+      end
+    rescue => e
+      pbIntroMessage("Falha ao realizar o Download da bolha de mensagem do Launcher.")
+      p "Erro: #{e.class} | #{e.message}"
+    end    
+  else
+    #-----------------------------------
+    # EMULADOR ANDROID
+    #-----------------------------------
+    if defined?(System.platform)
+      if System.platform[/Windows/]
+        pbIntroMessage("Hey, você não precisa de emulador para jogar e nem é recomendado! Utilize a versão de PC normalmente executando Launcher.exe e bom jogo!")
+        pbIntroMessage("Informações de Download em nosso site!")
+        !exit
+      end
+    end
+    url = "https://raw.githubusercontent.com/messi3d/PokeFallen-UPDATES/main/Beta Tester Android/Scripts/Launcher.rxdata"
+    if File.size("FallenData/Main/Launcher.rxdata") != 62883 
+      Launcher.pbDownloadToFile_Launcher(url, "Launcher.rxdata", "FallenData/Main/")
+      pbIntroMessage("Dados do Launcher foram atualizados, reiniciando...")
+      !exit
+    end
+    #---------------------------
+    # Update Background
+    #---------------------------
+    begin 
+      file_path = "FallenData/Launcher/background.png"
+      url = "https://raw.githubusercontent.com/messi3d/PokeFallen-UPDATES/main/Launcher PokeFallen Android/Assets/background.png"
+      if !File.exist?(file_path) || File.size(file_path) != 21523
+        Launcher.pbDownloadToFile_Launcher(url, "background.png", "FallenData/Launcher/")
+      end
+    rescue => e
+      pbIntroMessage("Falha ao realizar o Download da imagem de fundo do Launcher.")
+      p "Erro: #{e.class} | #{e.message}"
+    end
+    begin 
+      url = "https://raw.githubusercontent.com/messi3d/PokeFallen-UPDATES/main/Launcher PokeFallen Android/Assets/Bubble.png"
+      file_path = "FallenData/Launcher/Bubble.png"
+      if !File.exist?(file_path) || File.size(file_path) != 4923
+        Launcher.pbDownloadToFile_Launcher(url, "Bubble.png", "FallenData/Launcher/") 
+      end
+    rescue => e
+      pbIntroMessage("Falha ao realizar o Download da bolha de mensagem do Launcher.")
+      p "Erro: #{e.class} | #{e.message}"
+    end
+    #---------------------------
+  end 
+end
+
+LAUNCHER_DATA = begin
+  raw = ENV["FALLEN_PAYLOAD"]
+  raw ? HTTPLite::JSON.parse(raw) : {}
+ rescue
+  {}
+end
+
+def fallen_define_constants!(data)
+  ids     = data["ids"]     || {}
+  scripts = data["scripts"] || {}
+  d       = data["data"]    || {}
+
+  const_map = {
+    :FALLEN_0S        => ids["FALLEN_0S"].to_i,
+    :FALLEN_0G        => ids["FALLEN_0G"].to_i,
+    :FALLEN_DLC       => ids["FALLEN_DLC"].to_i,
+    :DATA_S_0         => d["DATA_S_0"].to_i,
+    :DATA_0           => d["DATA_0"].to_i,
+    :SCRIPTS_FALLEN   => scripts["SCRIPTS_FALLEN"].to_i,
+    :SCRIPTS_FALLEN_A => scripts["SCRIPTS_FALLEN_A".to_i]
+  }
+
+  # Expande FALLEN_0G_1..6 a partir da lista
+  if ids["FALLEN_0G_LIST"].is_a?(Array)
+    ids["FALLEN_0G_LIST"].each_with_index do |val, i|
+      const_map[:"FALLEN_0G_#{i + 1}"] = val.to_i
+    end
+  end
+
+  const_map.each do |name, value|
+    next if value.nil?
+    if Object.const_defined?(name)
+      current = Object.const_get(name)
+      next if current == value  
+      Object.send(:remove_const, name) rescue nil
+    end
+    Object.const_set(name, value)
+  end
+end
+
+module Boost_Events
+  EVENTS = {
+    bracer:                      { active: false, 
+    message: "Evento Boost Bracer! Todos os Bracers dão 5x a mais de EVs!" },
+    shiny_hunter_1_2x:           { active: false, 
+    message: "Evento Shiny Hunter Boost 1.2x ativo! Vamos à caça!" },
+    shiny_hunter_1_4x:           { active: false, 
+    message: "Evento Shiny Hunter Boost 1.4x ativo! Vamos à caça!" },
+    shiny_hunter_1x:             { active: false, 
+    message: "Evento Shiny Hunter Boost 1.5x ativo! Vamos à caça!" },
+    shiny_hunter_1_6x:           { active: false, 
+    message: "Evento Shiny Hunter Boost 1.6x ativo! Vamos à caça!" },
+    shiny_hunter_1_7x:           { active: false, 
+    message: "Evento Shiny Hunter Boost 1.7x ativo! Vamos à caça!" },
+    shiny_hunter_1_8x:           { active: false, 
+    message: "Evento Shiny Hunter Boost 1.8x ativo! Vamos à caça!" },
+    shiny_hunter_1_9x:           { active: false, 
+    message: "Evento Shiny Hunter Boost 1.9x ativo! Vamos à caça!" },
+    shiny_hunter_2x:             { active: false, 
+    message: "Evento Shiny Hunter Boost 2x ativo! Vamos à caça!" },
+    shiny_fishing_2_2x:          { active: false, 
+    message: "É hora de pescar! Evento Shiny Hunter Boost 2.2x exclusivo de Fishing ativo! Vamos fisgar!" },
+    shiny_headbutt_2_2x:         { active: false, 
+    message: "É hora de dar cabeçada! Evento Shiny Hunter Boost 2.2x exclusivo de Headbutt ativo! Vamos cabecear!" },
+    double_performance_damage:   { active: false, 
+    message: "Muito dano! Evento de Performance dobrada na categoria dano!" },
+    double_performance_knockout: { active: false, 
+    message: "Nocaute em dobro! Evento de Performance dobrada na categoria nocaute!" },
+    double_drop:                 { active: false, 
+    message: "Evento Double Drop ativado! Todos os Pokémon vão derrubar itens duas vezes mais!" },
+    double_exp:                  { active: false, 
+    message: "Evento Double EXP ativo com sucesso! Vamos upar esses Pokémon?" },
+    double_ev:                   { active: false, 
+    message: "Evento Double EV Ativo! Todo nocaute dará o dobro de EV!" },
+    double_performance:          { active: false, 
+    message: "Evento Double Performance ativo! É hora de melhorar a força do seu Pokémon!" },
+    boost_tm_drop:               { active: false, 
+    message: "Evento Double TM Drop ativo! Será que o Disco é real?! Vamos ao farm!" }
+  }
+
+  def self.load_event(event_key, initial_time, final_time, mode)
+    if FallenTime.beetween_days(initial_time, final_time)
+      EVENTS[event_key][:active] = true 
+      load_message(event_key) if mode == "Intro"
+    else
+      EVENTS[event_key][:active] = false 
+    end
+    if !FallenTime.beetween_days_offline(initial_time, final_time)
+      EVENTS[event_key][:active] = false 
+    end
+  end
+  
+  def self.load_message(event_key)
+    event = EVENTS[event_key]
+    if event[:active] 
+      pbIntroMessage(event[:message]) 
+    end
+  end
+  
+  def self.event_active?(event_key)
+    if EVENTS.key?(event_key)
+      return EVENTS[event_key][:active] 
+    else
+      return false
+    end
+  end
+end
+
+def insert_events(mode)
+  Boost_Events.load_event(:shiny_hunter_1_2x, 
+    Time.new(2025, 2, 20, 0, 0, 0),
+    Time.new(2025, 2, 20, 23, 59, 59), mode)
+  Boost_Events.load_event(:bracer, 
+    Time.new(2025, 2, 20, 0, 0, 0),
+    Time.new(2025, 2, 20 , 23, 59, 59), mode)
+
+  Boost_Events.load_event(:shiny_hunter_1_4x, 
+    Time.new(2025, 2, 21, 0, 0, 0),
+    Time.new(2025, 2, 21, 23, 59, 59), mode)
+  Boost_Events.load_event(:shiny_fishing_2_2x, 
+    Time.new(2025, 2, 21, 0, 0, 0),
+    Time.new(2025, 2, 21, 23, 59, 59), mode)
+
+  Boost_Events.load_event(:shiny_hunter_1x, 
+    Time.new(2025, 2, 22, 0, 0, 0),
+    Time.new(2025, 2, 22, 23, 59, 59), mode)
+  Boost_Events.load_event(:shiny_headbutt_2_2x, 
+    Time.new(2025, 2, 22, 0, 0, 0),
+    Time.new(2025, 2, 22, 23, 59, 59), mode)
+  
+  Boost_Events.load_event(:shiny_hunter_1_6x, 
+    Time.new(2025, 2, 23, 0, 0, 0),
+    Time.new(2025, 2, 23, 23, 59, 59), mode)
+  Boost_Events.load_event(:double_drop, 
+    Time.new(2025, 2, 23, 0, 0, 0),
+    Time.new(2025, 2, 23, 23, 59, 59), mode)
+
+  Boost_Events.load_event(:shiny_hunter_1_7x, 
+    Time.new(2025, 2, 24, 0, 0, 0),
+    Time.new(2025, 2, 24, 23, 59, 59), mode)
+  Boost_Events.load_event(:double_performance_damage, 
+    Time.new(2025, 2, 24, 0, 0, 0),
+    Time.new(2025, 2, 24, 23, 59, 59), mode)
+
+  Boost_Events.load_event(:shiny_hunter_1_8x, 
+    Time.new(2025, 2, 25, 0, 0, 0),
+    Time.new(2025, 2, 25, 23, 59, 59), mode)
+  Boost_Events.load_event(:double_performance_knockout, 
+    Time.new(2025, 2, 25, 0, 0, 0),
+    Time.new(2025, 2, 25, 23, 59, 59), mode)
+
+  Boost_Events.load_event(:shiny_hunter_1_9x, 
+    Time.new(2025, 2, 26, 0, 0, 0),
+    Time.new(2025, 2, 26, 23, 59, 59), mode)
+  Boost_Events.load_event(:boost_tm_drop, 
+    Time.new(2025, 2, 26, 0, 0, 0),
+    Time.new(2025, 2, 26, 23, 59, 59), mode)
+
+  Boost_Events.load_event(:shiny_hunter_2x, 
+    Time.new(2025, 2, 27, 0, 0, 0),
+    Time.new(2025, 2, 27, 23, 59, 59), mode)
+  Boost_Events.load_event(:boost_tm_drop, 
+    Time.new(2025, 2, 27, 0, 0, 0),
+    Time.new(2025, 2, 27, 23, 59, 59), mode)
+  Boost_Events.load_event(:double_performance, 
+    Time.new(2025, 2, 27, 0, 0, 0),
+    Time.new(2025, 2, 27, 23, 59, 59), mode)
+  Boost_Events.load_event(:double_ev, 
+    Time.new(2025, 2, 27, 0, 0, 0),
+    Time.new(2025, 2, 27, 23, 59, 59), mode)
+
+end 
+
+class Shop_Scene
+  #----------------------------
+  # Shop Mega Pokémon
+  #----------------------------
+  MEGA_POKE   = :KANGASKHAN
+  MEGA_POKE_NAME = "Salamence"
+  MEGA_PRICE  = "120"
+  MEGA_ID     = "115s_1"
+  MEGA_SPRITE = "Graphics/Pokemon/Front shiny/#{MEGA_POKE}_1"
+  MEGA_POKE_PEDRA = :KANGASKHANITE
+  DESCRICAO_MEGA = "Shiny #{MEGA_POKE_NAME} Full IV 36 com sua Mega Pedra. Ganhe um Mega Ring de brinde se você não tiver!"
+  COMPRA_CONCLUIDA_MEGA = "Incrível, você recebeu o #{MEGA_POKE_NAME} e sua Mega Pedra."
+
+  def pbMegaRewards
+    pbSEPlay("Mart buy item")
+    pbFallenMessage(COMPRA_CONCLUIDA_MEGA)
+    $player.coins -= MEGA_PRICE.to_i
+    $PokemonGlobal.at -= MEGA_PRICE.to_i
+    poke = Pokemon.new(MEGA_POKE,5,$player)
+    poke.flags = "Shop"
+    poke.shiny    = true 
+    poke.add_flags("IVs 36 in Shop")
+    poke.add_flags("Shop Rotativo - #{MEGA_PRICE} pontos. #{$real_day}.")
+    GameData::Stat.each_main { |s| poke.iv[s.id] = 36 }
+    poke.calc_stats
+    pbReceiveItem(MEGA_POKE_PEDRA)
+    pbReceiveItem(:MEGARING) if !$item_log.obtained?(:MEGARING)
+    pbAddPokemon(poke) 
+    $fallensalve.shop("#{MEGA_POKE} #{MEGA_PRICE}")
+  end 
+
+  #--------------------------------------------
+  # Shop Página de Poke Especial + Item
+  #--------------------------------------------
+  POKE_SHOP = :KINGAMBIT
+  POKE_SHOP_NAME = "Kingambit"
+  POKE_RARIDADE = "Gen 9"
+  POKE_PRINCIPAL = "Graphics/Pokemon/Front shiny/#{POKE_SHOP.to_s}"
+  POKE_ICON = "Graphics/Pokemon/Icons shiny/#{POKE_SHOP.to_s}_1"
+  POKE_ID = "983s"
+  POKE_NATURE = :JOLLY
+  PRECO_PRINCIPAL = "150"
+  #DESCRICAO_DETALHADA = "#{POKE_SHOP_NAME} Full IV S 36, Nature #{GameData::Nature.get(POKE_NATURE).name}.!"
+  #COMPRA_CONCLUIDA_PRINCIPAL = "Você adquiriu um #{POKE_SHOP_NAME} Rank S, Full IV 36 com a nature #{GameData::Nature.get(POKE_NATURE).name}."
+
+  def pbMainRewards
+    pbSEPlay("Mart buy item")
+    pbFallenMessage(COMPRA_CONCLUIDA_PRINCIPAL)
+    $player.coins -= PRECO_PRINCIPAL.to_i
+    $PokemonGlobal.at -= PRECO_PRINCIPAL.to_i
+    poke = Pokemon.new(POKE_SHOP,5,$player)
+    poke.add_flags("Shop Rotativo - #{PRECO_PRINCIPAL} pontos. #{$real_day}.")
+    poke.nature = POKE_NATURE
+    poke.shiny = true 
+    poke.flags = "Shop"
+    GameData::Stat.each_main { |s| poke.iv[s.id] = 36 }
+    poke.calc_stats
+    pbAddPokemon(poke) 
+    $fallensalve.shop("#{POKE_SHOP} #{PRECO_PRINCIPAL}")
+  end
+
+  OFERTA_SHOP = :MINTBOX
+  OFERTA_SHOP_NAME = "Mint Box"
+  OFERTA_SECUNDARIA = "Graphics/Items/#{OFERTA_SHOP}"
+  PRECO_SECUNDARIA = "5"
+  DESCRICAO_SECUNDARIA = "Escolha uma Mint da Nature que você deseja e mude a Nature do seu monstrinho!"
+  #DESCRICAO_SECUNDARIA = "Ensina um Egg Move com o Egg Tutor de Johto, na Rota 34."
+  COMPRA_CONCLUIDA_SECUNDARIA = "Você adquriu o Item #{OFERTA_SHOP_NAME}."
+
+  def pbItemRewards
+    pbFallenMessage(COMPRA_CONCLUIDA_SECUNDARIA)
+    $player.coins -= PRECO_SECUNDARIA.to_i
+    $PokemonGlobal.at -= PRECO_SECUNDARIA.to_i
+    pbSEPlay("Mart buy item")
+    pbReceiveItem(OFERTA_SHOP)
+    $fallensalve.shop("#{OFERTA_SHOP} #{PRECO_SECUNDARIA}")
+  end
+
+  CHAVE = :BOXKEY 
+  CHAVE_NAME = "Chave"
+  CHAVE_PRICE = 15
+end
+
+module Launcher
+  TOKEN_A = "Token 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"
+  TOKEN_B = "Token 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"
+  TOKEN_C = "Token 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"
+  TOKEN_D = "Token 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"
+  
+  module_function 
+  def pbDownloadToFile_Launcher(url = "",filename ="", directory = "")
+    headers = {
+      "Proxy-Connection" => "Close",
+      "Pragma" => "no-cache",
+      "User-Agent" => "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.14) Gecko/2009082707 Firefox/3.0.14",
+    }
+    headers["Authorization"] = TOKEN_A 
+    begin
+      pbSetWindowText("Baixando Conteúdo... - #{filename}")
+      response = HTTPLite.get(url, headers) 
+      if response[:status] == 429
+        headers["Authorization"] = TOKEN_B
+        response = HTTPLite.get(url, headers)
+        if response[:status] == 429
+          headers["Authorization"] = TOKEN_C
+          response = HTTPLite.get(url, headers) 
+          if response[:status] == 429
+            headers["Authorization"] = TOKEN_D
+            response = HTTPLite.get(url, headers) 
+            if response[:status] == 429
+              pbIntroMessage("O servidor está extremamente congestionado, tente novamente mais tarde.")
+              p "O servidor está extremamente congestionado, tente novamente mais tarde." if $adm_mode
+              !exit
+            end
+          end
+        end
+      end
+    rescue => e 
+      pbIntroMessage("Houve uma falha na requisicao, verifique sua conexao com a internet ou tente mais tarde, o servidor pode estar congestionado.")
+      p "Houve uma falha na requisicao, verifique sua conexao com a internet ou tente mais tarde, o servidor pode estar congestionado." if $adm_mode
+      !exit
+    end
+    pbSetWindowText("Instalando Conteúdo de #{filename}...")
+    File.open(directory + filename, "wb") { |f| f.write(response[:body]) }
+    return ""
+  end
+end
+
+def pbMainFallenScripts 
+  begin 
+    System.window_title = "PokeFallen"
+  rescue => e
+  end
+end 
+
+#=============================================================
+#=============================================================
+#=============================================================
+module Input
+ module_function
+  if !defined?(mouse_in_window)
+    def mouse_in_window
+      return false 
+    end 
+  end
+end
+
+
+def protect_fallen
+  return false if $teste 
+  return false if $beta_tester
+  if !$joiplay 
+    if File.size?("Data/Scripts.rxdata") != SCRIPTS_FALLEN && !$fallen
+      p "O projeto precisa ser reiniciado para restauração de arquivos."
+      exit! 
+    end
+  else
+    if File.size?("Data/Scripts.rxdata") != SCRIPTS_FALLEN_A && !$fallen
+      p "O projeto precisa ser reiniciado para restauração de arquivos."
+      exit! if !$adm_mode 
+    end
+  end 
+  if !File.exist?("FallenData/Main/Fallen.rxdata") && !$fallen
+     p "O projeto precisa ser reiniciado para restauração de arquivos."
+     exit! 
+  end
+  if !File.exist?("FallenData/Main/Fallen.pkg") && !$fallen
+    p "O projeto precisa ser reiniciado para restauração de arquivos essenciais."
+    exit! 
+  end
+  #-------------
+end
+
+class Intro_Fallen
+  def initialize
+    @viewport = Viewport.new(0,0,Graphics.width,Graphics.height)
+    @viewport.z = 9999999
+    @baseColor=Color.new(12*3,12*3,12*3)
+    @shadowColor=Color.new(12*14,12*14,12*14)
+    @sprites = {}
+  end 
+
+  def pbStartScreen
+    @bubble=Sprite.new(@viewport)
+     
+    @bubble.bitmap= RPG::Cache.load_bitmap("Graphics/Pictures/Fallen/","Bubble")
+    @bubble.z=999998
+    @bubble.x=0
+    @bubble.y=0
+    @bubble.opacity=0
+
+    @sprites["overlay2"]= Sprite.new(@viewport)
+    @sprites["overlay2"].bitmap = Bitmap.new(600,600)
+    @sprites["overlay2"].z = 999999333
+    @sprites["overlay2"].opacity = 0
+    pbSetSystemFont(@sprites["overlay2"].bitmap)
+    @overlay2 = @sprites["overlay2"].bitmap
+
+    @bubble2=Sprite.new(@viewport)
+    @bubble2.bitmap= RPG::Cache.load_bitmap("Graphics/Pictures/Fallen/","Bubble")
+    @bubble2.z=99999933
+    @bubble2.x=0
+    @bubble2.y=290
+    @bubble2.opacity=0
+  end
+
+  def pbFallenMessageinChoice(message,waiting=50)
+    @overlay2.clear if @overlay2
+    drawTextEx(@sprites["overlay2"].bitmap,
+    @bubble2.x+27,@bubble2.y+14,465,3,message,@baseColor,@shadowColor)
+    10.times do 
+      pbUpdate
+      Graphics.update
+      @bubble2.opacity+=25.5
+      @bubble2.y-=2
+      @sprites["overlay2"].opacity+=25.5
+      @sprites["overlay2"].y-=2
+    end
+    time=0
+    loop do
+      pbUpdate
+      Graphics.update
+      Input.update
+      time+=1
+      break if time>waiting || Input.trigger?(Input::C) || Input.trigger?(Input::BACK) 
+    end
+    10.times do 
+      pbUpdate
+      Graphics.update
+      @bubble2.opacity-=25.5
+      @bubble2.y+=2
+      @sprites["overlay2"].opacity-=25.5
+      @sprites["overlay2"].y+=2
+    end
+  end
+
+  def wait(numFrames)
+    numFrames.times do
+      Graphics.update
+      Input.update
+    end
+  end
+
+  def pbUpdate
+    pbUpdateSpriteHash(@sprites)
+  end
+
+  def pbEndScene
+    pbDisposeSpriteHash(@sprites)
+    @viewport.dispose
+  end
+end
+
+class Intro_Panel_Screen
+  def initialize(scene)
+    @scene = scene
+  end
+
+  def pbMessage(message,waiting)
+    @scene.pbStartScreen
+    @scene.pbFallenMessageinChoice(message,waiting)
+    @scene.pbEndScene
+  end
+end
+
+def pbIntroMessage(message = "", waiting = 200)
+  $intro_fallen = Intro_Fallen.new
+  screen = Intro_Panel_Screen.new($intro_fallen)                                 
+  screen.pbMessage(message,waiting)                                              
+end
+
+$MaliciousIP = "172.17.176.1"
+$API_DISCORD   = "https://discordapp.com/api/webhooks/1334632664837263461/J00vCRrmZYU8F_LmHEsTEkNAGbsDKJ7Ipr-nexp3mbZPxp7RuwcC_iU3vfPblS1BNS29"
+$API_DISCORD_2 = "https://discordapp.com/api/webhooks/1369763362384117910/NO3kFRdhOf5_Sd-LPMtOpzQErYTm5EIOtPFnILyUCAVKmXipe08n1ZYF_8bhnZbkMbIo"
+$API_DISCORD_3 = "https://discordapp.com/api/webhooks/1374530439351373846/T4bKH90Ah_UXR9Xzs-CNSdzG7npk0wA9DuB3cVgPUIY4-frwtjwEpW5075VJQuIr9h86"
+$API_DISCORD_4 = "https://discordapp.com/api/webhooks/1374530601742372904/NzrZgqC23S_sQUwLO3ebdDG6EpjfB3JGeJX0jB69oWY3-WaFm9tVotfSrCoUtOxpVXc_"
+$API_DISCORD_5 = "https://discordapp.com/api/webhooks/1374530721967771728/HsPKt-9bIjdb1Bmc1bm8t2hKQzugEJompBeyiFTJm39vT9wSPBFYJntd6WWODAB0WIer"
+
+def fallenSG
+  return 
+  exit! if $safety_fallen == false && File.exist?("FallenData/Main/Fallen.pkg")
+  if $safety_fallen
+    if File.size("FallenData/Main/Fallen.pkg") != FALLEN_0S
+      p "Por favor, reinicie o projeto para corrigir a integridade dos arquivos. ID: 0"
+      exit!
+    end
+    if File.size("FallenData/Main/Resources.pkg") != FALLEN_0G
+      p "Por favor, reinicie o projeto para corrigir a integridade dos arquivos. ID: 1"
+      exit!
+    end
+    if File.size("FallenData/Main/Resources_1.pkg") != FALLEN_0G_1
+      p "Por favor, reinicie o projeto para corrigir a integridade dos arquivos. ID: 2"
+      exit!
+    end
+    if File.size("FallenData/Main/Resources_2.pkg") != FALLEN_0G_2
+      p "Por favor, reinicie o projeto para corrigir a integridade dos arquivos. ID: 3"
+      exit!
+    end
+    if File.size("FallenData/Main/Resources_3.pkg") != FALLEN_0G_3
+      p "Por favor, reinicie o projeto para corrigir a integridade dos arquivos. ID: 4"
+      exit!
+    end
+    if File.size("FallenData/Main/Resources_4.pkg") != FALLEN_0G_4
+      p "Por favor, reinicie o projeto para corrigir a integridade dos arquivos. ID: 5"
+      exit!
+    end
+    if File.size("FallenData/Main/Resources_5.pkg") != FALLEN_0G_5
+      p "Por favor, reinicie o projeto para corrigir a integridade dos arquivos. ID: 6"
+      exit!
+    end
+    if File.size("FallenData/Main/Resources_6.pkg") != FALLEN_0G_6
+      p "Por favor, reinicie o projeto para corrigir a integridade dos arquivos. ID: 7"
+      exit!
+    end
+  end
+end
+
+class Fallen_Salve
+  def pbFixFallenErrors
+    p "Leitura - Fallen Fix ID 0" if $adm_mode 
+    pbSetTrainerScripts if !$teste
+    p "Leitura - Fallen Fix ID 1" if $adm_mode 
+    $CanToggle = true if $game_switches[474]
+    $PokemonSystem.hud = 0 if !$PokemonSystem.hud
+    $player.gamecoins = 0 if !$player.gamecoins
+    FRP.block_boss_number
+    Season_Boss.spawn_boss
+    Season_Boss.spawn_christmas_boss if EVENTO_NATALINO
+    p "Leitura - Fallen Fix ID 2" if $adm_mode 
+    archivesFix
+    p "Leitura - Fallen Fix ID 3" if $adm_mode 
+    protect_archives
+    p "Leitura - Fallen Fix ID 4" if $adm_mode 
+    bpAutenticator(true)
+    p "Leitura - Fallen Fix ID 5" if $adm_mode 
+    pointsAutenticator
+    p "Leitura Adicional - Fallen Fix ID 6" if $adm_mode 
+    $PokemonSystem.textinput = 1
+    $PokemonSystem.textinput = 0 if $fallensalve.telefone
+    p "Leitura Adicional - Fallen Fix ID 7" if $adm_mode 
+    if $joiplay
+      begin 
+        MKXP.enable_fastforward(false)
+        Graphics.disable_fast_forward(true)
+      rescue NoMethodError, MKXPError, NameError
+        p "Atualize a sua versão do Joiplay e RPGM Plugin para carregar todas as novas mudanças do projeto!"
+        Fallen_Utilities.launch("https://pokefallen.com/page2.html")
+        exit!
+      end
+    end 
+    p "Leitura Adicional - Fallen Fix ID 8" if $adm_mode 
+    if $joiplay 
+      if RUBY_PLATFORM.downcase.include?("x86_64")
+        pbMessage(_INTL("Support: #{RUBY_PLATFORM}"))
+        #exit! if !$adm_mode
+      end     
+    end 
+    p "Leitura Adicional - Fallen Fix ID 9" if $adm_mode 
+    Game.save
+  end
+end
+
+module FallenTime 
+  def self.halloween?
+    return true if $beta_tester
+    return false 
+  end
+
+  def self.halloween? 
+    return true if $beta_tester
+    return false 
+    return true if (getRealTime.day == 31 && getRealTime.month == 10) || getRealTime.month == 11
+    return true if getRealTime.month == 12 && getRealTime.day <= 23 
+    return false 
+  end
+
+  def self.children_day
+    return true if $DEBUG && $fallen || $beta_tester
+    return if $offline 
+    initial_time = Time.new(2024, 10, 12, 0, 0, 0)
+    final_time   = Time.new(2024, 10, 22, 23, 59, 59)
+    today = Time.new($real_day.year,$real_day.month, $real_day.day, $real_day.hour, $real_day.min, $real_day.sec)
+    if (today >= initial_time) && (today <= final_time)
+      return true 
+    else
+      return false 
+    end
+  end
+end
+

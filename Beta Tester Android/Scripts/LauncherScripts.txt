@@ -1,0 +1,262 @@
+def launcher_execFixes
+  # Permission
+  if !$joiplay
+    pbIntroMessage("Esta versão é exclusiva de Android, caso queira jogar no PC, baixe a versão disponível para PC em nosso site!")
+    !exit 
+  end
+  
+  # Joiplay Version
+  if (MKXP.plugin_version()).to_i < 12053 || !defined?(System.uptime) || !defined?(Input.triggerex?)
+    pbIntroMessage("Sua versao de RPGM Plugin esta desatualizada, atualize com o link oficial de nosso site!")
+    begin 
+      MKXP.launch("https://pokefallen.com/download.html#image1-v")
+    rescue MKXPError, NoMethodError
+      pbIntroMessage("Acesse www.pokefallen.com")
+    end
+    !exit
+  end
+  
+  UpdaterDownloaderArchives.update_exec
+  UpdaterDownloaderArchives.update_data
+  UpdaterDownloaderArchives.update_fonts
+  UpdaterDownloaderArchives.update_patches
+  
+  # Update Musics BGM
+  musics_bgm = ["Abertura Johto.ogg","BW 149 Gate.ogg", "BW 204b Route 6 (Summer).ogg", "HGSS 103 An Adventure Begins!.ogg", "HGSS 104 New Bark Town.ogg",
+  "HGSS 107 Elms Lab.ogg", "HGSS 109 Route 29.ogg","HGSS 110 Battle! (Wild Pokemon Johto).ogg", "HGSS 113 Cherrygrove City.ogg", "HGSS 120 Route 30.ogg",
+  "HGSS 122 Violet City.ogg", "HGSS 123 Sprout Tower.ogg", "HGSS 128 Union Cave.ogg", "HGSS 134 Trainers' Eyes Meet (Team Rocket).ogg", "HGSS 137 Trainers_ Eyes Meet (Rival).ogg",
+  "HGSS 142 Pokemon Gym.ogg", "HGSS 143 Battle! (Gym Leader Johto).ogg", "HGSS 164 Pokegear Radio Professor Oak_s Pokemon Talk.ogg", "HGSS 201 Route 26.ogg", "HGSS 226 Professor Oak.ogg",
+  "SM 001 Title.ogg", "SM 023 The Festival in Iki Town.ogg", "XY 041 Dark Skies.ogg", "Halloween.ogg",
+  "HGSS 136 Route 34.ogg", "HGSS 173 Route 42.ogg", "HGSS 231 Route 47.ogg", "HGSS 232 Safari Zone Gate.ogg", 
+  "HGSS 233 Safari Zone.ogg", "Route 4.ogg", "XY 070 Tower of Mastery.ogg",
+  "HGSS 128 Union Cave.ogg", "HGSS 130 Ruins Of Alph.ogg", "HGSS 133 Azalea Town.ogg",
+  "HGSS 136 Route 34.ogg", "HGSS 141 Goldenrod City.ogg", "HGSS 142 Pokemon Gym.ogg", 
+  "HGSS 149 Goldenrod Game Corner.ogg", "HGSS 211 Magnet Train.ogg", "HGSS 214 Celadon City.ogg",
+  "SwSh 040 Team Yell Appears!.ogg", "SwSh 041 Battle! (Team Yell).ogg", "SwSh 126 Master Dojo.ogg",
+  "Abertura Pokemon Johto.ogg", "B2W2 212 PWT Final Round!.ogg", "BW 228 The Pokemon League.ogg", 
+  "HGSS 210 Route 24.ogg", "HGSS 216 Route 11.ogg", "PLA 092 Battle! (Legendary Pokemon).ogg", 
+  "Red Blue Remix.ogg", "SM 147 The Path to the League.ogg", "HGSS 209 Cerulean City.ogg",
+  "B2W2 443 Battle Hall.ogg", "ORAS 138 Secret Super Training.ogg", "ORAS 139 Battle! (XY Trainer Battle).ogg",
+  "XY 078 The Kalos Power Plant.ogg", "Halloween Pokémon Remix- The Night's Shade.ogg",
+  "BW 409 Team Rocket.ogg", "HGSS 127 Trainers_ Eyes Meet (Kimono Girl).ogg",
+  "HGSS 135 Battle! (Team Rocket).ogg", "HGSS 158 National Park.ogg",
+  "HGSS 161 Ecruteak Dance Theater.ogg", "HGSS 166 Route 38.ogg",
+  "HGSS 169 Olivine Lighthouse.ogg", "HGSS 184 Bell Tower.ogg",
+  "Pokémon Anime Sound Collection - Raid!.ogg", "Pokémon Anime Sound Collection - Total War.ogg",
+  "Pokémon Anime Sound Collection - Who is Stronger_ Epic Battle!.ogg",
+  "Pokémon XY  Emotion (An Unwavering Heart)  LyricWulf Piano Tutorial on Synthesia.ogg",
+  "Route 34 HGSS Remastered.ogg", "HGSS 223 Mt. Moon.ogg", "HGSS 228 Trainers_ Eyes Meet (Casey).ogg",
+  "SM 011 Mahalo Trail.ogg", "SM 013 A Tapu Appears!.ogg", "SM 017 Hau_s Theme.ogg", "SM 018 Battle! (Hau).ogg",
+  "SM 055 Route 2 on Melemele Island.ogg", "SM 060 Verdant Cavern (A Trial Site).ogg", "SM 066 Seaward Cave.ogg",
+  "SM 067 Island Kahuna_s Theme.ogg", "SM 068 Battle! (Island Kahuna).ogg", "SM 101 Ultra Beasts.ogg", "SM 102 Battle! (Ultra Beast).ogg",
+  ]
+  for i in 0...musics_bgm.length
+    if !File.exist?("Audio/BGM/#{musics_bgm[i]}") 
+      url = "https://raw.githubusercontent.com/messi3d/PokeFallen-UPDATES/main/Audio/BGM/#{musics_bgm[i]}"
+      Launcher.pbDownloadToFile_Launcher(url, musics_bgm[i], "Audio/BGM/")
+      reload = true
+    end 
+  end 
+  
+  # New folder 
+  begin 
+    Dir.mkdir("Audio/BGM/DP") unless File.exist?("Audio/BGM/DP")
+    Dir.mkdir("Audio/BGM/HGSS") unless File.exist?("Audio/BGM/HGSS")
+    Dir.mkdir("Audio/BGM/BW") unless File.exist?("Audio/BGM/BW")
+    new_folder_musics = ["DP/Battle wild.ogg", "DP/Battle trainer.ogg", "DP/DPPT 012 Victory! (Wild Pokemon).ogg",
+    "DP/DPPT 024 Victory! (Trainer Battle).ogg", "DP/DPPT 039 Level Up.ogg",
+    "HGSS/Battle wild.ogg", "HGSS/Battle trainer.ogg", "HGSS/HGSS 111 Victory! (Wild Pokemon).ogg",
+    "HGSS 112 Level Up!.ogg", "HGSS 119 Victory! (Trainer Battle).ogg",
+    "BW/Battle trainer.ogg","BW/Battle wild.ogg", "BW/BW 115 Victory! (Wild Pokemon).ogg", 
+    "BW/BW 116 Level Up!.ogg", "BW/BW 127 Victory! (Trainer Battle).ogg"]
+    for i in 0...new_folder_musics.length
+      if !File.exist?("Audio/BGM/#{new_folder_musics[i]}") 
+        url = "https://raw.githubusercontent.com/messi3d/PokeFallen-UPDATES/main/Audio/BGM/#{new_folder_musics[i]}"
+        Launcher.pbDownloadToFile_Launcher(url, new_folder_musics[i], "Audio/BGM/")
+        reload = true
+      end 
+    end 
+  rescue Errno::EACCES
+    pbIntroMessage("Permissão negada para criação de novos arquivos, abra o jogo no modo Administrador para permitir que novos arquivos sejam instalados.")     if !$joiplay
+    pbIntroMessage("Permissão negada para criação de novos arquivos, verifique as permissões do Emulador Joiplay para que os novos arquivos sejam instalados.") if $joiplay
+  rescue Errno::ENOSPC
+    pbIntroMessage("Não há espaço suficiente para o jogo baixar a atualização.")
+  rescue => e
+    pbIntroMessage("Ocorreu um erro inesperado: #{e.message}")
+  end
+
+  # Update Musics SE
+  musics_se = ["Sprinkle.mp3", "PEGBoxSmash.ogg", "PEGBuzzer.ogg", "PEGCancel.ogg", "PEGCashNoise.wav", "PEGChoose.wav", "PEGItemGet.wav", "PEGSelect.wav",
+  "Quest Scroll Roll.mp3", "OWThunder1.wav", "OWThunder2.wav", "Open Case.wav"]
+  for i in 0...musics_se.length
+    if !File.exist?("Audio/SE/#{musics_se[i]}") 
+      url = "https://raw.githubusercontent.com/messi3d/PokeFallen-UPDATES/main/Audio/SE/#{musics_se[i]}"
+      Launcher.pbDownloadToFile_Launcher(url, musics_se[i], "Audio/SE/")
+      reload = true
+    end 
+  end 
+
+  banned_se = %w[ORANGURU.wav LITTEN.wav DHELMISE.wav MIMIKYU.wav TOXAPEX.wav TOGEDEMARU.wav VANILLUXE.wav KOMALA.wav 
+    GRENINJA.wav LYCANROC.wav DRAMPA.wav COMFEY.wav BEWEAR.wav TURTONATOR.wav SHIINOTIC.wav CUTIEFLY.wav BRIONNE.wav 
+    SANDYGAST.wav CHARJABUG.wav ROWLET.wav WIMPOD.wav TYRUNT.wav MAREANIE.wav]
+  banned_se.each do |name|
+    path = "Audio/SE/Cries/#{name}"
+    begin; File.delete(path) if File.exist?(path); rescue Errno::EACCES, Errno::ENOENT; end
+  end
+
+  # Update Musics BGS
+  musics_bgs = ["HeavyStorm.ogg", "Rain.ogg", "Storm.ogg"]
+  for i in 0...musics_bgs.length
+    if !File.exist?("Audio/BGS/#{musics_bgs[i]}") 
+      url = "https://raw.githubusercontent.com/messi3d/PokeFallen-UPDATES/main/Audio/BGS/#{musics_bgs[i]}"
+      Launcher.pbDownloadToFile_Launcher(url, musics_bgs[i], "Audio/BGS/")
+      reload = true
+    end 
+  end 
+  
+  # Update Archives
+  banned_archives = ["Game.exe", "Game.ini", "FallenData/Main/Resources_.pkg", "postload.rb", "preload.rb",
+  "PBS/abilities.txt","PBS/battle_facility_lists.txt", "PBS/berry_plants.txt",
+  "PBS/encounters.txt","PBS/items.txt", "PBS/map_connections.txt",
+  "PBS/map_metadata.txt","PBS/metadata.txt","PBS/moves.txt",
+  "PBS/phone.txt","PBS/pokemon.txt","PBS/pokemon_forms.txt",
+  "PBS/pokemon_metrics.txt","PBS/regional_dexes.txt",
+  "PBS/ribbons.txt","PBS/shadow_pokemon.txt","PBS/town_map.txt",
+  "PBS/trainer_types.txt","PBS/trainers.txt","PBS/types.txt"] 
+  for i in 0...banned_archives.length
+    if File.exist?(banned_archives[i]) 
+      begin; File.delete(banned_archives[i]); rescue Errno::EACCES, Errno::ENOENT; end
+      reset = true 
+    end 
+  end
+  set_message_update if reset 
+
+  # Reload Cache
+  System.reload_cache if reload
+  pbIntroMessage("Leitura completa realizada, vamos lá!") if $adm_mode
+end 
+
+def set_message_update
+  pbIntroMessage("Dados renovados, reinicie o Client.")
+  !exit
+end
+
+module Launcher
+  TOKEN_A = "Token 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"
+  TOKEN_B = "Token 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"
+
+  module_function 
+  def pbDownloadToFile_Launcher(url = "",filename ="", directory = "")
+    headers = {
+      "Proxy-Connection" => "Close",
+      "Pragma" => "no-cache",
+      "User-Agent" => "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.14) Gecko/2009082707 Firefox/3.0.14",
+    }
+    headers["Authorization"] = TOKEN_A 
+    begin
+      pbSetWindowText("Baixando Conteúdo... - #{filename}")
+      response = HTTPLite.get(url, headers) 
+      if response[:status] == 429
+        headers["Authorization"] = TOKEN_B
+        response = HTTPLite.get(url, headers)
+        if response[:status] == 429
+          pbIntroMessage("O servidor está extremamente congestionado, tente novamente mais tarde.")
+          pbIntroMessage("O servidor está extremamente congestionado, tente novamente mais tarde.") if $adm_mode
+          !exit
+        end
+      end
+    rescue => e 
+      pbIntroMessage("Houve uma falha na requisicao, verifique sua conexao com a internet ou tente mais tarde, o servidor pode estar congestionado.")
+      pbIntroMessage("Houve uma falha na requisicao, verifique sua conexao com a internet ou tente mais tarde, o servidor pode estar congestionado.") if $adm_mode
+      !exit
+    end
+    pbSetWindowText("Instalando Conteúdo de #{filename}...")
+    File.open(directory + filename, "wb") { |f| f.write(response[:body]) }
+    return ""
+  end
+end
+
+def pbIntroMessage(text)
+  print(text)
+end unless defined?(pbIntroMessage)
+
+def launch_joiplay_download
+  begin 
+    System.launch("https://pokefallen.com/download.html")
+  rescue MKXPError, NoMethodError
+    begin 
+      MKXP.launch("https://pokefallen.com/download.html")
+    rescue MKXPError, NoMethodError
+      pbIntroMessage("Sua versao de RPGM Plugin esta desatualizada, atualize com o link oficial de nosso site!")
+    end 
+  end 
+end
+    
+module UpdaterDownloaderArchives
+  BASE_URL = "https://raw.githubusercontent.com/messi3d/PokeFallen-UPDATES/main/"
+  FONTS = ["Bitsy.ttf","Black White 2.ttf","Roma Bold.otf"]
+
+  module_function
+  def update_exec
+    ret = false 
+    #if File.size("Fallen.exe") != 14874112
+    #  pbIntroMessage("Seu PokeFallen está desatualizado...")
+    #  pbIntroMessage("Atualize para a versão oficial pelo site do projeto!")
+    #  pbIntroMessage("Faça uma cópia do seu save para esta atualização!")
+    #  launch_joiplay_download
+    #  exit 
+    #end
+    if File.size("x64-msvcrt-ruby310.dll") != 10155536
+      url = BASE_URL + "Beta Tester/x64-msvcrt-ruby310.dll"
+      pbDownloadToFile_Launcher(url, "x64-msvcrt-ruby310.dll", "")
+      ret = true 
+    end 
+    if File.size("zlib1.dll") != 120814
+      url = BASE_URL + "Beta Tester/zlib1.dll"
+      pbDownloadToFile_Launcher(url, "zlib1.dll", "")
+      ret = true 
+    end 
+    if !File.exist?("Fallen.ini") || File.size("Fallen.ini") != 123 && File.size("Fallen.ini") != 115 
+      url = BASE_URL + "Launcher PokeFallen/Fallen.ini"
+      Launcher.pbDownloadToFile_Launcher(url, "Fallen.ini", "")
+      ret = true 
+    end
+    if ret 
+      pbIntroMessage("Executável atualizado com sucesso, reiniciando...")
+      exit 
+    end 
+  end
+  
+  def update_patches
+    return false 
+    url = BASE_URL + "Beta Tester Android/patches.json"
+    if !File.exist?("patches.json") || File.size("patches.json") != 460 
+      Launcher.pbDownloadToFile_Launcher(url, "patches.json", "")
+      pbIntroMessage("Patches atualizados com sucesso, reiniciando...")
+      !exit
+    end
+  end
+  
+  def update_fonts
+    fonts = FONTS
+    reload = false
+    fonts.each do |filename|
+      path = "Fonts/#{filename}"
+      next if File.exist?(path)
+      url = BASE_URL + "#{path}"
+      Launcher.pbDownloadToFile_Launcher(url, filename, "Fonts/")
+      reload = true
+    end
+    return reload
+  end
+
+  # Data
+  def update_data
+    url = BASE_URL + "Beta Tester Android/Data/Scripts.rxdata"
+    if File.size("Data/Scripts.rxdata") != 4331
+      Launcher.pbDownloadToFile_Launcher(url, "Scripts.rxdata", "Data/")
+      pbIntroMessage("Data Dados atualizados com sucesso, reiniciando...")
+      !exit
+    end
+  end 
+end
